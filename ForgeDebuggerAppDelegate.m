@@ -57,33 +57,45 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
-	mServerSocket = [[NetSocket netsocketListeningOnPort: 13762] retain];
+	mServerSocket = [[NetSocket netsocketListeningOnRandomPort] retain];
 	[mServerSocket setDelegate: self];
 	[mServerSocket scheduleOnCurrentRunLoop];
+	
+	mClientSocket = [[NetSocket netsocketConnectedToHost: @"127.0.0.1" port: [mServerSocket localPort]] retain];
+	[mClientSocket scheduleOnCurrentRunLoop];
+	[mClientSocket setDelegate: self];
+	
+	[NSTimer scheduledTimerWithTimeInterval: 2.0 target: self selector: @selector(timerAction:) userInfo: nil repeats: YES];
+}
+
+
+-(void)	timerAction: (NSTimer*)theTimer
+{
+	[mClientSocket writeString: @"AAAABBBB" encoding: NSASCIIStringEncoding];
 }
 
 
 - (void)netsocketConnected:(NetSocket*)inNetSocket
 {
-	NSLog(@"Connected.");
+	NSLog(@"A Connected.");
 }
 
 
 - (void)netsocket:(NetSocket*)inNetSocket connectionTimedOut:(NSTimeInterval)inTimeout
 {
-	NSLog(@"Connection timed out.");
+	NSLog(@"A Connection timed out.");
 }
 
 
 - (void)netsocketDisconnected:(NetSocket*)inNetSocket
 {
-	NSLog(@"Disconnected.");
+	NSLog(@"A Disconnected.");
 }
 
 
 - (void)netsocket:(NetSocket*)inNetSocket connectionAccepted:(NetSocket*)inNewNetSocket
 {
-	NSLog(@"Connection accepted.");
+	NSLog(@"A Connection accepted.");
 	
 	(ForgeDebuggerConnection*)[[ForgeDebuggerConnection alloc] initWithSocket: inNewNetSocket];
 }
@@ -91,13 +103,13 @@
 
 - (void)netsocket:(NetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
 {
-	NSLog(@"Data Available.");
+	NSLog(@"A Data Available.");
 }
 
 
 - (void)netsocketDataSent:(NetSocket*)inNetSocket
 {
-	NSLog(@"Data Sent.");
+	NSLog(@"A Data Sent.");
 }
 
 
@@ -112,6 +124,18 @@
 	[[mTextView textStorage] addAttributes: textAttrs range: NSMakeRange(0, [codeStr length])];
 	
 	return YES;
+}
+
+
+-(NSInteger)	numberOfRowsInTableView: (NSTableView*)inView
+{
+	return 0;
+}
+
+
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+{
+	return @"Meglon?";
 }
 
 @end

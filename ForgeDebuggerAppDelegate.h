@@ -19,6 +19,7 @@
 	NSTableView		*		mVariablesTable;
 	NSTextView		*		mTextView;
 	NetSocket		*		mServerSocket;
+	NetSocket		*		mClientSocket;
 }
 
 @property (assign) IBOutlet NSWindow		*		window;

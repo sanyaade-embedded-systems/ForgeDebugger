@@ -16,7 +16,12 @@
 	if( (self = [super init]) )
 	{
 		socket = [inSock retain];
+		readBufLock = [[NSLock alloc] init];
+		readBuffer = [[NSMutableString alloc] init];
 		[socket setDelegate: self];
+		[socket scheduleOnCurrentRunLoop];
+		
+		NSLog( @"B Connection Created" );
 	}
 	
 	return self;
@@ -26,6 +31,10 @@
 -(void)	dealloc
 {
 	[socket release];
+	[readBuffer release];
+	[readBufLock release];
+
+	NSLog( @"B Connection Destroyed" );
 	
 	[super dealloc];
 }
@@ -33,6 +42,8 @@
 
 -(void)	writeOneLine: (NSString*)str
 {
+	NSLog( @"B Writing one line" );
+
 	[readBufLock lock];
 	[socket writeString: str encoding: NSISOLatin1StringEncoding];
 	[readBufLock unlock];
@@ -41,27 +52,27 @@
 
 - (void)netsocketConnected:(NetSocket*)inNetSocket
 {
-	NSLog(@"Connected.");
+	NSLog(@"B Connected.");
 }
 
 
 - (void)netsocket:(NetSocket*)inNetSocket connectionTimedOut:(NSTimeInterval)inTimeout
 {
 	[self autorelease];
-	NSLog(@"Connection timed out.");
+	NSLog(@"B Connection timed out.");
 }
 
 
 - (void)netsocketDisconnected:(NetSocket*)inNetSocket
 {
 	[self autorelease];
-	NSLog(@"Disconnected.");
+	NSLog(@"B Disconnected.");
 }
 
 
 - (void)netsocket:(NetSocket*)inNetSocket connectionAccepted:(NetSocket*)inNewNetSocket
 {
-	NSLog(@"Connection accepted.");
+	NSLog(@"B Connection accepted.");
 }
 
 
@@ -85,7 +96,7 @@
 
 - (void)netsocket:(NetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
 {
-	NSLog( @"%u bytes available", inAmount );
+	NSLog( @"B %u bytes available", inAmount );
 	
 	NSData*	theBytes = [inNetSocket readData: 8];
 	
@@ -95,7 +106,7 @@
 
 - (void)netsocketDataSent:(NetSocket*)inNetSocket
 {
-	NSLog(@"Data Sent.");
+	NSLog(@"B Data Sent.");
 }
 
 @end

@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'ForgeDebugger' target in the 'ForgeDebugger' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif

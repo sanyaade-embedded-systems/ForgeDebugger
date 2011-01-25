@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		256AC3DA0F4B6AC300CF3369 /* ForgeDebuggerAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 256AC3D90F4B6AC300CF3369 /* ForgeDebuggerAppDelegate.m */; };
+		55B4C6D512EF6D9800F4D171 /* ULINetSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 55B4C6D412EF6D9800F4D171 /* ULINetSocket.m */; };
 		55E7FE8E12E0EE2000C7DE5D /* ForgeDebuggerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 55E7FE8D12E0EE2000C7DE5D /* ForgeDebuggerConnection.m */; };
-		55E7FE9E12E0F29100C7DE5D /* NetSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 55E7FE9D12E0F29100C7DE5D /* NetSocket.m */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -27,10 +27,10 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		55B4C6D312EF6D9800F4D171 /* ULINetSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ULINetSocket.h; path = ../ULINetSocket/Classes/ULINetSocket.h; sourceTree = SOURCE_ROOT; };
+		55B4C6D412EF6D9800F4D171 /* ULINetSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ULINetSocket.m; path = ../ULINetSocket/Classes/ULINetSocket.m; sourceTree = SOURCE_ROOT; };
 		55E7FE8C12E0EE2000C7DE5D /* ForgeDebuggerConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ForgeDebuggerConnection.h; sourceTree = "<group>"; };
 		55E7FE8D12E0EE2000C7DE5D /* ForgeDebuggerConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ForgeDebuggerConnection.m; sourceTree = "<group>"; };
-		55E7FE9C12E0F29100C7DE5D /* NetSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetSocket.h; sourceTree = "<group>"; };
-		55E7FE9D12E0F29100C7DE5D /* NetSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetSocket.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* ForgeDebugger-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ForgeDebugger-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* ForgeDebugger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ForgeDebugger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -54,8 +54,7 @@
 				256AC3D90F4B6AC300CF3369 /* ForgeDebuggerAppDelegate.m */,
 				55E7FE8C12E0EE2000C7DE5D /* ForgeDebuggerConnection.h */,
 				55E7FE8D12E0EE2000C7DE5D /* ForgeDebuggerConnection.m */,
-				55E7FE9C12E0F29100C7DE5D /* NetSocket.h */,
-				55E7FE9D12E0F29100C7DE5D /* NetSocket.m */,
+				55B4C6CC12EF6D8200F4D171 /* NetSocket */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -126,6 +125,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		55B4C6CC12EF6D8200F4D171 /* NetSocket */ = {
+			isa = PBXGroup;
+			children = (
+				55B4C6D312EF6D9800F4D171 /* ULINetSocket.h */,
+				55B4C6D412EF6D9800F4D171 /* ULINetSocket.m */,
+			);
+			name = NetSocket;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -191,7 +199,7 @@
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				256AC3DA0F4B6AC300CF3369 /* ForgeDebuggerAppDelegate.m in Sources */,
 				55E7FE8E12E0EE2000C7DE5D /* ForgeDebuggerConnection.m in Sources */,
-				55E7FE9E12E0F29100C7DE5D /* NetSocket.m in Sources */,
+				55B4C6D512EF6D9800F4D171 /* ULINetSocket.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,7 +7,7 @@
 //
 
 #import "ForgeDebuggerAppDelegate.h"
-#import "NetSocket.h"
+#import "ULINetSocket.h"
 #import "ForgeDebuggerConnection.h"
 
 @implementation ForgeDebuggerAppDelegate
@@ -57,11 +57,11 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
-	mServerSocket = [[NetSocket netsocketListeningOnRandomPort] retain];
+	mServerSocket = [[ULINetSocket netsocketListeningOnRandomPort] retain];
 	[mServerSocket setDelegate: self];
 	[mServerSocket scheduleOnCurrentRunLoop];
 	
-	mClientSocket = [[NetSocket netsocketConnectedToHost: @"127.0.0.1" port: [mServerSocket localPort]] retain];
+	mClientSocket = [[ULINetSocket netsocketConnectedToHost: @"127.0.0.1" port: [mServerSocket localPort]] retain];
 	[mClientSocket scheduleOnCurrentRunLoop];
 	[mClientSocket setDelegate: self];
 	
@@ -75,25 +75,25 @@
 }
 
 
-- (void)netsocketConnected:(NetSocket*)inNetSocket
+- (void)netsocketConnected:(ULINetSocket*)inNetSocket
 {
 	NSLog(@"A Connected.");
 }
 
 
-- (void)netsocket:(NetSocket*)inNetSocket connectionTimedOut:(NSTimeInterval)inTimeout
+- (void)netsocket:(ULINetSocket*)inNetSocket connectionTimedOut:(NSTimeInterval)inTimeout
 {
 	NSLog(@"A Connection timed out.");
 }
 
 
-- (void)netsocketDisconnected:(NetSocket*)inNetSocket
+- (void)netsocketDisconnected:(ULINetSocket*)inNetSocket
 {
 	NSLog(@"A Disconnected.");
 }
 
 
-- (void)netsocket:(NetSocket*)inNetSocket connectionAccepted:(NetSocket*)inNewNetSocket
+- (void)netsocket:(ULINetSocket*)inNetSocket connectionAccepted:(ULINetSocket*)inNewNetSocket
 {
 	NSLog(@"A Connection accepted.");
 	
@@ -101,13 +101,13 @@
 }
 
 
-- (void)netsocket:(NetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
+- (void)netsocket:(ULINetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
 {
 	NSLog(@"A Data Available.");
 }
 
 
-- (void)netsocketDataSent:(NetSocket*)inNetSocket
+- (void)netsocketDataSent:(ULINetSocket*)inNetSocket
 {
 	NSLog(@"A Data Sent.");
 }

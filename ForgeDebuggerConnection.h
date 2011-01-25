@@ -7,16 +7,16 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "NetSocket.h"
+#import "ULINetSocket.h"
 
 
 @interface ForgeDebuggerConnection : NSObject
 {
-	NetSocket*			socket;
-	NSMutableString*	readBuffer;
+	ULINetSocket	*	socket;
+	NSMutableString	*	readBuffer;
 	NSLock*				readBufLock;
 }
 
--(id)	initWithSocket: (NetSocket*)sock;
+-(id)	initWithSocket: (ULINetSocket*)sock;
 
 @end

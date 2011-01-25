@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@class NetSocket;
+@class ULINetSocket;
 
 
 @interface ForgeDebuggerAppDelegate : NSObject <NSApplicationDelegate>
@@ -18,8 +18,8 @@
 	NSTableView		*		mStackTable;
 	NSTableView		*		mVariablesTable;
 	NSTextView		*		mTextView;
-	NetSocket		*		mServerSocket;
-	NetSocket		*		mClientSocket;
+	ULINetSocket	*		mServerSocket;
+	ULINetSocket	*		mClientSocket;
 }
 
 @property (assign) IBOutlet NSWindow		*		window;

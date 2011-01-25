@@ -11,7 +11,7 @@
 
 @implementation ForgeDebuggerConnection
 
--(id)	initWithSocket: (NetSocket*)inSock
+-(id)	initWithSocket: (ULINetSocket*)inSock
 {
 	if( (self = [super init]) )
 	{
@@ -50,27 +50,27 @@
 }
 
 
-- (void)netsocketConnected:(NetSocket*)inNetSocket
+- (void)netsocketConnected:(ULINetSocket*)inNetSocket
 {
 	NSLog(@"B Connected.");
 }
 
 
-- (void)netsocket:(NetSocket*)inNetSocket connectionTimedOut:(NSTimeInterval)inTimeout
+- (void)netsocket:(ULINetSocket*)inNetSocket connectionTimedOut:(NSTimeInterval)inTimeout
 {
 	[self autorelease];
 	NSLog(@"B Connection timed out.");
 }
 
 
-- (void)netsocketDisconnected:(NetSocket*)inNetSocket
+- (void)netsocketDisconnected:(ULINetSocket*)inNetSocket
 {
 	[self autorelease];
 	NSLog(@"B Disconnected.");
 }
 
 
-- (void)netsocket:(NetSocket*)inNetSocket connectionAccepted:(NetSocket*)inNewNetSocket
+- (void)netsocket:(ULINetSocket*)inNetSocket connectionAccepted:(ULINetSocket*)inNewNetSocket
 {
 	NSLog(@"B Connection accepted.");
 }
@@ -90,11 +90,11 @@
 		return;
 	
 	uint32_t	*	bytesArray = (uint32_t*) [eightBytesObj bytes];
-	[self processOneMessage: bytesArray[0] withParam: bytesArray[1]];
+	[self processOneMessage: bytesArray[0] withParam: ntohl(bytesArray[1])];
 }
 
 
-- (void)netsocket:(NetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
+- (void)netsocket:(ULINetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
 {
 	NSLog( @"B %u bytes available", inAmount );
 	
@@ -104,7 +104,7 @@
 }
 
 
-- (void)netsocketDataSent:(NetSocket*)inNetSocket
+- (void)netsocketDataSent:(ULINetSocket*)inNetSocket
 {
 	NSLog(@"B Data Sent.");
 }

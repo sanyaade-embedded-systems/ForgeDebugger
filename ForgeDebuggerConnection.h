@@ -10,6 +10,14 @@
 #import "ULINetSocket.h"
 
 
+@protocol ForgeDebuggerSession
+
+-(void)	handleEMTYOperation: (NSData*)theData;
+-(void)	handleVARIOperation: (NSData*)theData;
+
+@end
+
+
 @interface ForgeDebuggerConnection : NSObject
 {
 	ULINetSocket	*	socket;
@@ -17,6 +25,6 @@
 	NSLock*				readBufLock;
 }
 
--(id)	initWithSocket: (ULINetSocket*)sock;
+-(id)	initWithSocket: (ULINetSocket*)inSock debuggerSession: (id<ForgeDebuggerSession>)inDebuggerSession;
 
 @end

@@ -61,17 +61,15 @@
 	[mServerSocket setDelegate: self];
 	[mServerSocket scheduleOnCurrentRunLoop];
 	
-	mClientSocket = [[ULINetSocket netsocketConnectedToHost: @"127.0.0.1" port: [mServerSocket localPort]] retain];
-	[mClientSocket scheduleOnCurrentRunLoop];
-	[mClientSocket setDelegate: self];
-	
-	[NSTimer scheduledTimerWithTimeInterval: 2.0 target: self selector: @selector(timerAction:) userInfo: nil repeats: YES];
+	mVariables = [[NSMutableArray alloc] init];
 }
 
 
--(void)	timerAction: (NSTimer*)theTimer
+-(void)	dealloc
 {
-	[mClientSocket writeString: @"AAAABBBB" encoding: NSASCIIStringEncoding];
+	[mVariables release];
+	
+	[super dealloc];
 }
 
 
@@ -97,7 +95,8 @@
 {
 	NSLog(@"A Connection accepted.");
 	
-	(ForgeDebuggerConnection*)[[ForgeDebuggerConnection alloc] initWithSocket: inNewNetSocket];
+	ForgeDebuggerConnection*	conn = [[ForgeDebuggerConnection alloc] initWithSocket: inNewNetSocket debuggerSession: self];
+	conn = conn;
 }
 
 
@@ -129,13 +128,59 @@
 
 -(NSInteger)	numberOfRowsInTableView: (NSTableView*)inView
 {
-	return 0;
+	return [mVariables count];
 }
 
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-	return @"Meglon?";
+	return [[mVariables objectAtIndex: row] objectForKey: [tableColumn identifier]];
 }
+
+
+-(NSData*)	subdataUntilNextNullByteInData: (NSData*)theData foundRange: (NSRange*)theRange	// Must be { 0, 0 } on first call.
+{
+	NSInteger	len = [theData length];
+	char		theByte = 0;
+	theRange->location += theRange->length;
+	theRange->length = 0;
+	
+	for( NSInteger x = 0; x < len; x++ )
+	{
+		[theData getBytes: &theByte length: 1];
+		if( theByte == 0 )
+			break;
+		theRange->length ++;
+	}
+	
+	return [theData subdataWithRange: *theRange];
+}
+
+
+-(void)	handleEMTYOperation: (NSData*)theData
+{
+	[mVariables removeAllObjects];
+	[mVariablesTable reloadData];
+}
+
+
+-(void)	handleVARIOperation: (NSData*)theData
+{
+	NSRange			theRange = { 0, 0 };
+	
+	NSData		*	varNameData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	NSData		*	varTypeData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	NSData		*	varValueData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	
+	NSString	*	varName = [[NSString alloc] initWithData: varNameData encoding: NSUTF8StringEncoding];
+	NSString	*	varType = [[NSString alloc] initWithData: varTypeData encoding: NSUTF8StringEncoding];
+	NSString	*	varValue = [[NSString alloc] initWithData: varValueData encoding: NSUTF8StringEncoding];
+	[mVariables addObject: [NSDictionary dictionaryWithObjectsAndKeys: varName, @"name", varType, @"type", varValue, @"value", nil]];
+	[varName release];
+	[varType release];
+	[varValue release];
+	[mVariablesTable reloadData];
+}
+
 
 @end

@@ -7,19 +7,20 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "ForgeDebuggerConnection.h"
 
 
 @class ULINetSocket;
 
 
-@interface ForgeDebuggerAppDelegate : NSObject <NSApplicationDelegate>
+@interface ForgeDebuggerAppDelegate : NSObject <NSApplicationDelegate,ForgeDebuggerSession>
 {
     NSWindow		*		mWindow;
 	NSTableView		*		mStackTable;
 	NSTableView		*		mVariablesTable;
 	NSTextView		*		mTextView;
 	ULINetSocket	*		mServerSocket;
-	ULINetSocket	*		mClientSocket;
+	NSMutableArray	*		mVariables;
 }
 
 @property (assign) IBOutlet NSWindow		*		window;

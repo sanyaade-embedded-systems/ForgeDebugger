@@ -11,7 +11,7 @@
 
 @implementation ForgeDebuggerConnection
 
--(id)	initWithSocket: (ULINetSocket*)inSock
+-(id)	initWithSocket: (ULINetSocket*)inSock debuggerSession: (id<ForgeDebuggerSession>)inDebuggerSession
 {
 	if( (self = [super init]) )
 	{
@@ -76,31 +76,20 @@
 }
 
 
--(void)	processOneMessage: (uint32_t)messageID withParam: (uint32_t)param
-{
-	NSLog( @"%c%c%c%c %d",
-			((char*)&messageID)[0], ((char*)&messageID)[1], ((char*)&messageID)[2], ((char*)&messageID)[3],
-			param);
-}
-
-
--(void)	processOneMessageObj: (NSData*)eightBytesObj
-{
-	if( [eightBytesObj length] != 8 )
-		return;
-	
-	uint32_t	*	bytesArray = (uint32_t*) [eightBytesObj bytes];
-	[self processOneMessage: bytesArray[0] withParam: ntohl(bytesArray[1])];
-}
-
-
 - (void)netsocket:(ULINetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
 {
 	NSLog( @"B %u bytes available", inAmount );
 	
-	NSData*	theBytes = [inNetSocket readData: 8];
+	NSData*			theBytes = [inNetSocket readData: 8];
+	uint32_t	*	bytesArray = (uint32_t*) [theBytes bytes];
+	char		*	singleBytes = (char*) bytesArray;
+    
+    NSData* thePayload = [inNetSocket readData: bytesArray[1]];
+    
+	SEL	theAction = NSSelectorFromString( [NSString stringWithFormat: @"handle%c%c%c%cOperation:", singleBytes[0], singleBytes[1], singleBytes[2], singleBytes[3]] );
 	
-	[self performSelectorOnMainThread: @selector(processOneMessageObj:) withObject: theBytes waitUntilDone: NO];
+	if( [self respondsToSelector: theAction] )
+		[self performSelectorOnMainThread: theAction withObject: thePayload waitUntilDone: NO];
 }
 
 

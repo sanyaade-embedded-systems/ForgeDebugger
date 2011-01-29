@@ -25,12 +25,14 @@
 	[mServerSocket scheduleOnCurrentRunLoop];
 	
 	mVariables = [[NSMutableArray alloc] init];
+	mHandlers = [[NSMutableArray alloc] init];
 }
 
 
 -(void)	dealloc
 {
 	[mVariables release];
+	[mHandlers release];
 	
 	[super dealloc];
 }
@@ -91,13 +93,23 @@
 
 -(NSInteger)	numberOfRowsInTableView: (NSTableView*)inView
 {
-	return [mVariables count];
+	if( inView == mStackTable )
+		return [mHandlers count];
+	else
+		return [mVariables count];
 }
 
 
-- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+- (id)tableView:(NSTableView *)inView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-	return [[mVariables objectAtIndex: row] objectForKey: [tableColumn identifier]];
+	if( inView == mStackTable )
+	{
+		return [[mHandlers objectAtIndex: row] objectForKey: [tableColumn identifier]];
+	}
+	else
+	{
+		return [[mVariables objectAtIndex: row] objectForKey: [tableColumn identifier]];
+	}
 }
 
 
@@ -124,6 +136,8 @@
 {
 	[mVariables removeAllObjects];
 	[mVariablesTable reloadData];
+	[mHandlers removeAllObjects];
+	[mStackTable reloadData];
 }
 
 
@@ -145,5 +159,23 @@
 	[mVariablesTable reloadData];
 }
 
+
+-(void)	handleCALLOperation: (NSData*)theData
+{
+	NSRange			theRange = { 0, 0 };
+	
+	NSData		*	handlerNameData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	
+	NSString	*	handlerName = [[NSString alloc] initWithData: handlerNameData encoding: NSUTF8StringEncoding];
+	[mHandlers addObject: [NSDictionary dictionaryWithObjectsAndKeys: handlerName, @"name", nil]];
+	[handlerName release];
+	[mStackTable reloadData];
+}
+
+
+-(void)	handleWAITOperation: (NSData*)theData
+{
+	// Enable UI until one of them is used and we've sent a reply to the client.
+}
 
 @end

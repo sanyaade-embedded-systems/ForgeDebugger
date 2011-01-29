@@ -21,6 +21,7 @@
 	NSTextView		*		mTextView;
 	ULINetSocket	*		mServerSocket;
 	NSMutableArray	*		mVariables;
+	NSMutableArray	*		mHandlers;
 }
 
 @property (assign) IBOutlet NSWindow		*		window;

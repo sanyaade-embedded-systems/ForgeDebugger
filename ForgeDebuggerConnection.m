@@ -3,7 +3,7 @@
 //  ForgeDebugger
 //
 //  Created by Uli Kusterer on 13.11.05.
-//  Copyright 2005 Uli Kusterer. All rights reserved.
+//  Copyright 2011 Uli Kusterer. All rights reserved.
 //
 
 #import "ForgeDebuggerConnection.h"
@@ -20,6 +20,7 @@
 		readBuffer = [[NSMutableString alloc] init];
 		[socket setDelegate: self];
 		[socket scheduleOnCurrentRunLoop];
+		session = inDebuggerSession;
 		
 		NSLog( @"B Connection Created" );
 	}
@@ -45,7 +46,7 @@
 	NSLog( @"B Writing one line" );
 
 	[readBufLock lock];
-	[socket writeString: str encoding: NSISOLatin1StringEncoding];
+	[socket writeString: str encoding: NSUTF8StringEncoding];
 	[readBufLock unlock];
 }
 
@@ -88,8 +89,8 @@
     
 	SEL	theAction = NSSelectorFromString( [NSString stringWithFormat: @"handle%c%c%c%cOperation:", singleBytes[0], singleBytes[1], singleBytes[2], singleBytes[3]] );
 	
-	if( [self respondsToSelector: theAction] )
-		[self performSelectorOnMainThread: theAction withObject: thePayload waitUntilDone: NO];
+	if( [session respondsToSelector: theAction] )
+		[(NSObject*)session performSelectorOnMainThread: theAction withObject: thePayload waitUntilDone: NO];
 }
 
 

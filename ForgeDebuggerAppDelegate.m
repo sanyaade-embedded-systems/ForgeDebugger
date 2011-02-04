@@ -16,6 +16,11 @@
 @synthesize stackTable = mStackTable;
 @synthesize variablesTable = mVariablesTable;
 @synthesize textView = mTextView;
+@synthesize stepInstructionButton = mStepInstructionButton;
+@synthesize continueButton = mContinueButton;
+@synthesize exitToTopButton = mExitToTopButton;
+@synthesize addCheckpointButton = mAddCheckpointButton;
+@synthesize removeCheckpointButton = mRemoveCheckpointButton;
 
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
@@ -60,8 +65,7 @@
 {
 	NSLog(@"A Connection accepted.");
 	
-	ForgeDebuggerConnection*	conn = [[ForgeDebuggerConnection alloc] initWithSocket: inNewNetSocket debuggerSession: self];
-	conn = conn;
+	mDebuggerConnection = [[ForgeDebuggerConnection alloc] initWithSocket: inNewNetSocket debuggerSession: self];
 }
 
 
@@ -176,6 +180,61 @@
 -(void)	handleWAITOperation: (NSData*)theData
 {
 	// Enable UI until one of them is used and we've sent a reply to the client.
+	[mStepInstructionButton setEnabled: YES];
+	[mContinueButton setEnabled: YES];
+	[mExitToTopButton setEnabled: YES];
+	[mAddCheckpointButton setEnabled: YES];
+	[mRemoveCheckpointButton setEnabled: YES];
+}
+
+
+-(void)	deactivateUI
+{
+	[mStepInstructionButton setEnabled: NO];
+	[mContinueButton setEnabled: NO];
+	[mExitToTopButton setEnabled: NO];
+	[mAddCheckpointButton setEnabled: NO];
+	[mRemoveCheckpointButton setEnabled: NO];
+}
+
+
+-(IBAction)	doStepOneInstruction: (id)sender
+{
+	[mDebuggerConnection writeOneLine: @"step\0\0\0\0"];
+	
+	[self deactivateUI];
+}
+
+
+-(IBAction)	doContinue: (id)sender
+{
+	[mDebuggerConnection writeOneLine: @"CONT\0\0\0\0"];
+
+	[self deactivateUI];
+}
+
+
+-(IBAction)	doExitToTop: (id)sender
+{
+	[mDebuggerConnection writeOneLine: @"EXIT\0\0\0\0"];
+
+	[self deactivateUI];
+}
+
+
+-(IBAction)	doAddCheckpoint: (id)sender
+{
+	[mDebuggerConnection writeOneLine: @"+CHK\0\0\0\0"];
+
+	[self deactivateUI];
+}
+
+
+-(IBAction)	doRemoveCheckpoint: (id)sender
+{
+	[mDebuggerConnection writeOneLine: @"-CHK\0\0\0\0"];
+
+	[self deactivateUI];
 }
 
 @end

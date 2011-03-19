@@ -25,12 +25,14 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
-	mServerSocket = [[ULINetSocket netsocketListeningOnRandomPort] retain];
+	mServerSocket = [[ULINetSocket netsocketListeningOnPort: 13762] retain];
 	[mServerSocket setDelegate: self];
 	[mServerSocket scheduleOnCurrentRunLoop];
 	
 	mVariables = [[NSMutableArray alloc] init];
 	mHandlers = [[NSMutableArray alloc] init];
+	
+	[self setDebuggerUIEnabled: NO];
 }
 
 
@@ -168,6 +170,7 @@
 {
 	NSRange			theRange = { 0, 0 };
 	
+	
 	NSData		*	handlerNameData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
 	
 	NSString	*	handlerName = [[NSString alloc] initWithData: handlerNameData encoding: NSUTF8StringEncoding];
@@ -177,24 +180,20 @@
 }
 
 
--(void)	handleWAITOperation: (NSData*)theData
+-(void)	setDebuggerUIEnabled: (BOOL)inEnabled
 {
-	// Enable UI until one of them is used and we've sent a reply to the client.
-	[mStepInstructionButton setEnabled: YES];
-	[mContinueButton setEnabled: YES];
-	[mExitToTopButton setEnabled: YES];
-	[mAddCheckpointButton setEnabled: YES];
-	[mRemoveCheckpointButton setEnabled: YES];
+	[mStepInstructionButton setEnabled: inEnabled];
+	[mContinueButton setEnabled: inEnabled];
+	[mExitToTopButton setEnabled: inEnabled];
+	[mAddCheckpointButton setEnabled: inEnabled];
+	[mRemoveCheckpointButton setEnabled: inEnabled];
 }
 
 
--(void)	deactivateUI
+-(void)	handleWAITOperation: (NSData*)theData
 {
-	[mStepInstructionButton setEnabled: NO];
-	[mContinueButton setEnabled: NO];
-	[mExitToTopButton setEnabled: NO];
-	[mAddCheckpointButton setEnabled: NO];
-	[mRemoveCheckpointButton setEnabled: NO];
+	// Enable UI until one of them is used and we've sent a reply to the client.
+	[self setDebuggerUIEnabled: YES];
 }
 
 
@@ -202,7 +201,7 @@
 {
 	[mDebuggerConnection writeOneLine: @"step\0\0\0\0"];
 	
-	[self deactivateUI];
+	[self setDebuggerUIEnabled: NO];
 }
 
 
@@ -210,7 +209,7 @@
 {
 	[mDebuggerConnection writeOneLine: @"CONT\0\0\0\0"];
 
-	[self deactivateUI];
+	[self setDebuggerUIEnabled: NO];
 }
 
 
@@ -218,7 +217,7 @@
 {
 	[mDebuggerConnection writeOneLine: @"EXIT\0\0\0\0"];
 
-	[self deactivateUI];
+	[self setDebuggerUIEnabled: NO];
 }
 
 
@@ -226,7 +225,7 @@
 {
 	[mDebuggerConnection writeOneLine: @"+CHK\0\0\0\0"];
 
-	[self deactivateUI];
+	[self setDebuggerUIEnabled: NO];
 }
 
 
@@ -234,7 +233,7 @@
 {
 	[mDebuggerConnection writeOneLine: @"-CHK\0\0\0\0"];
 
-	[self deactivateUI];
+	[self setDebuggerUIEnabled: NO];
 }
 
 @end

@@ -84,13 +84,19 @@
 	NSData*			theBytes = [inNetSocket readData: 8];
 	uint32_t	*	bytesArray = (uint32_t*) [theBytes bytes];
 	char		*	singleBytes = (char*) bytesArray;
+    unsigned		payloadLength = bytesArray[1];
+	
+    NSData* thePayload = [inNetSocket readData: payloadLength];
     
-    NSData* thePayload = [inNetSocket readData: bytesArray[1]];
-    
-	SEL	theAction = NSSelectorFromString( [NSString stringWithFormat: @"handle%c%c%c%cOperation:", singleBytes[0], singleBytes[1], singleBytes[2], singleBytes[3]] );
+	NSString	*	selName = [NSString stringWithFormat: @"handle%c%c%c%cOperation:", singleBytes[0], singleBytes[1], singleBytes[2], singleBytes[3]];
+	SEL	theAction = NSSelectorFromString( selName );
+	
+	NSLog( @"Asked to do %@ with %d bytes of payload", selName, payloadLength );
 	
 	if( [session respondsToSelector: theAction] )
 		[(NSObject*)session performSelectorOnMainThread: theAction withObject: thePayload waitUntilDone: NO];
+	else
+		NSLog( @"No handler for %@", selName );
 }
 
 

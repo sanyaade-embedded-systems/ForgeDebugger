@@ -126,12 +126,22 @@
 	theRange->location += theRange->length;
 	theRange->length = 0;
 	
-	for( NSInteger x = 0; x < len; x++ )
+	if( theRange->location != 0 )
+		theRange->location ++;	// Skip previous range's trailing NULL byte.
+		
+	for( NSInteger x = theRange->location; x < len; x++ )
 	{
-		[theData getBytes: &theByte length: 1];
+		[theData getBytes: &theByte range: NSMakeRange(x,1)];
 		if( theByte == 0 )
 			break;
 		theRange->length ++;
+	}
+	
+	if( theRange->length == 0 || theRange->location >= [theData length] )
+	{
+		theRange->location = [theData length];
+		theRange->length = 0;
+		return [NSData data];
 	}
 	
 	return [theData subdataWithRange: *theRange];
@@ -177,6 +187,18 @@
 	[mHandlers addObject: [NSDictionary dictionaryWithObjectsAndKeys: handlerName, @"name", nil]];
 	[handlerName release];
 	[mStackTable reloadData];
+}
+
+
+-(void)	handleINSTOperation: (NSData*)theData
+{
+	NSRange			theRange = { 0, 0 };
+	NSData		*	instructionData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	
+	NSString	*	instructionStr = [[NSString alloc] initWithData: instructionData encoding: NSUTF8StringEncoding];
+	[[[mTextView textStorage] mutableString] appendString: instructionStr];
+	[[[mTextView textStorage] mutableString] appendString: @"\n"];
+	[instructionStr release];
 }
 
 

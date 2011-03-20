@@ -16,11 +16,11 @@
 	if( (self = [super init]) )
 	{
 		socket = [inSock retain];
-		readBufLock = [[NSLock alloc] init];
-		readBuffer = [[NSMutableString alloc] init];
 		[socket setDelegate: self];
 		[socket scheduleOnCurrentRunLoop];
 		session = inDebuggerSession;
+		
+		currentData = [[NSMutableData alloc] init];
 		
 		NSLog( @"B Connection Created" );
 	}
@@ -32,8 +32,9 @@
 -(void)	dealloc
 {
 	[socket release];
-	[readBuffer release];
-	[readBufLock release];
+	socket = nil;
+	[currentData release];
+	currentData = nil;
 
 	NSLog( @"B Connection Destroyed" );
 	
@@ -45,9 +46,7 @@
 {
 	NSLog( @"B Writing one line" );
 
-	[readBufLock lock];
 	[socket writeString: str encoding: NSUTF8StringEncoding];
-	[readBufLock unlock];
 }
 
 
@@ -77,17 +76,20 @@
 }
 
 
-- (void)netsocket:(ULINetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
+-(NSInteger)	processOneCommandInDataBuffer
 {
-	NSLog( @"B %u bytes available", inAmount );
+	if( [currentData length] < 8 )
+		return 0;
 	
-	NSData*			theBytes = [inNetSocket readData: 8];
-	uint32_t	*	bytesArray = (uint32_t*) [theBytes bytes];
+	uint32_t	*	bytesArray = (uint32_t*) [currentData bytes];
 	char		*	singleBytes = (char*) bytesArray;
-    unsigned		payloadLength = bytesArray[1];
+	unsigned		payloadLength = bytesArray[1];
 	
-    NSData* thePayload = [inNetSocket readData: payloadLength];
-    
+	if( ([currentData length] -8) < payloadLength )
+		return 0;
+	
+	NSData* thePayload = [currentData subdataWithRange: NSMakeRange(8,payloadLength)];
+	
 	NSString	*	selName = [NSString stringWithFormat: @"handle%c%c%c%cOperation:", singleBytes[0], singleBytes[1], singleBytes[2], singleBytes[3]];
 	SEL	theAction = NSSelectorFromString( selName );
 	
@@ -97,6 +99,26 @@
 		[(NSObject*)session performSelectorOnMainThread: theAction withObject: thePayload waitUntilDone: NO];
 	else
 		NSLog( @"No handler for %@", selName );
+	
+	return payloadLength + 8;
+}
+
+
+-(void)	processCommandsInDataBuffer
+{
+	NSInteger	bytesRead = 0;
+	while(( bytesRead = [self processOneCommandInDataBuffer] ))
+		[currentData replaceBytesInRange: NSMakeRange(0,bytesRead) withBytes: nil length: 0];
+}
+
+
+- (void)netsocket:(ULINetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
+{
+	NSLog( @"B %u bytes available", inAmount );
+	
+	[inNetSocket readOntoData: currentData];
+	
+	[self processCommandsInDataBuffer];
 }
 
 

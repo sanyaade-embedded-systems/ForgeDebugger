@@ -23,9 +23,8 @@
 @interface ForgeDebuggerConnection : NSObject
 {
 	ULINetSocket	*			socket;
-	NSMutableString	*			readBuffer;
-	NSLock*						readBufLock;
 	id<ForgeDebuggerSession>	session;
+	NSMutableData	*			currentData;
 }
 
 -(id)	initWithSocket: (ULINetSocket*)inSock debuggerSession: (id<ForgeDebuggerSession>)inDebuggerSession;

@@ -46,4 +46,6 @@
 -(IBAction)	doAddCheckpoint: (id)sender;
 -(IBAction)	doRemoveCheckpoint: (id)sender;
 
+-(void)		setDebuggerUIEnabled: (BOOL)inEnable;
+
 @end

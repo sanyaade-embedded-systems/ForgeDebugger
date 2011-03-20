@@ -10,6 +10,7 @@
 #import "ULINetSocket.h"
 #import "ForgeDebuggerConnection.h"
 
+
 @implementation ForgeDebuggerAppDelegate
 
 @synthesize window = mWindow;
@@ -192,13 +193,22 @@
 
 -(void)	handleINSTOperation: (NSData*)theData
 {
-	NSRange			theRange = { 0, 0 };
-	NSData		*	instructionData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	NSRange						theRange = { 0, 0 };
+	NSData		*				instructionData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	unsigned long long			instructionPointer = 0;
+	static unsigned long long	sLastInstructionPointer = 0;
+	[theData getBytes: &instructionPointer range: NSMakeRange(theRange.location+theRange.length+1, sizeof(instructionPointer))];
 	
-	NSString	*	instructionStr = [[NSString alloc] initWithData: instructionData encoding: NSUTF8StringEncoding];
-	[[[mTextView textStorage] mutableString] appendString: instructionStr];
-	[[[mTextView textStorage] mutableString] appendString: @"\n"];
-	[instructionStr release];
+	if( sLastInstructionPointer != instructionPointer )
+	{
+		NSString	*	instructionStr = [[NSString alloc] initWithData: instructionData encoding: NSUTF8StringEncoding];
+		[[[mTextView textStorage] mutableString] appendFormat: @"%ll016x: %@\n", instructionPointer, instructionStr];
+		[instructionStr release];
+		
+		[[mTextView textStorage] addAttribute: NSFontAttributeName value: [NSFont userFixedPitchFontOfSize: 10.0] range: NSMakeRange(0,[[mTextView textStorage] length])];
+		
+		sLastInstructionPointer = instructionPointer;
+	}
 }
 
 

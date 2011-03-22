@@ -17,6 +17,8 @@
 @synthesize stackTable = mStackTable;
 @synthesize variablesTable = mVariablesTable;
 @synthesize textView = mTextView;
+@synthesize fileNameField = mFileNameField;
+@synthesize instructionField = mInstructionField;
 @synthesize stepInstructionButton = mStepInstructionButton;
 @synthesize continueButton = mContinueButton;
 @synthesize exitToTopButton = mExitToTopButton;
@@ -194,7 +196,7 @@
 -(void)	handleINSTOperation: (NSData*)theData
 {
 	NSRange						theRange = { 0, 0 };
-	NSData		*				instructionData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	NSData				*		instructionData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
 	unsigned long long			instructionPointer = 0;
 	static unsigned long long	sLastInstructionPointer = 0;
 	[theData getBytes: &instructionPointer range: NSMakeRange(theRange.location+theRange.length+1, sizeof(instructionPointer))];
@@ -202,13 +204,68 @@
 	if( sLastInstructionPointer != instructionPointer )
 	{
 		NSString	*	instructionStr = [[NSString alloc] initWithData: instructionData encoding: NSUTF8StringEncoding];
-		[[[mTextView textStorage] mutableString] appendFormat: @"%ll016x: %@\n", instructionPointer, instructionStr];
+		[mInstructionField setStringValue: [NSString stringWithFormat: @"%ll016x: %@\n", instructionPointer, instructionStr]];
 		[instructionStr release];
-		
-		[[mTextView textStorage] addAttribute: NSFontAttributeName value: [NSFont userFixedPitchFontOfSize: 10.0] range: NSMakeRange(0,[[mTextView textStorage] length])];
 		
 		sLastInstructionPointer = instructionPointer;
 	}
+}
+
+
+-(void)	handleSOUROperation: (NSData*)theData
+{
+	NSRange			theRange = { 0, 0 };
+	NSData		*	fileNameData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	NSData		*	fileContentData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	
+	NSString	*	fileNameStr = [[NSString alloc] initWithData: fileNameData encoding: NSUTF8StringEncoding];
+	NSString	*	fileContentStr = [[NSString alloc] initWithData: fileContentData encoding: NSUTF8StringEncoding];
+	[[[mTextView textStorage] mutableString] setString: fileContentStr];
+	[mFileNameField setStringValue: fileNameStr];
+	[fileNameStr release];
+	[fileContentStr release];
+	
+	[[mTextView textStorage] addAttribute: NSFontAttributeName value: [NSFont userFixedPitchFontOfSize: 10.0] range: NSMakeRange(0,[[mTextView textStorage] length])];
+}
+
+
+-(void)	handleLINEOperation: (NSData*)theData
+{
+	NSRange			allRange = NSMakeRange(0,[[mTextView textStorage] length]);
+	NSRange			lineRange = { 0,0 };
+	uint32_t		theLine = 0;
+	NSString	*	theStr = [mTextView string];
+	NSInteger		textLength = [theStr length];
+	NSInteger		currLine = 1;
+	BOOL			foundLine = NO;
+	BOOL			foundLineEnd = NO;
+	
+	[theData getBytes: &theLine length: sizeof(theLine)];
+	
+	for( NSInteger currIdx = 0; currIdx < textLength; currIdx++ )
+	{
+		if( [theStr characterAtIndex: currIdx] == '\n' )
+		{
+			if( foundLine )
+			{
+				lineRange.length = currIdx -lineRange.location +1;	// Select the line break, too.
+				foundLineEnd = YES;
+				break;
+			}
+			currLine += 1;
+		}
+		else if( currLine == theLine && !foundLine )
+		{
+			lineRange.location = currIdx;
+			foundLine = YES;
+		}
+	}
+	
+	if( foundLine && !foundLineEnd )
+		lineRange.length = textLength -lineRange.location;
+	
+	[[mTextView textStorage] removeAttribute: NSBackgroundColorAttributeName range: allRange];
+	[[mTextView textStorage] addAttribute: NSBackgroundColorAttributeName value: [NSColor colorWithCalibratedRed:0.8 green: 1.0 blue: 0.8 alpha: 1.0] range: lineRange];
 }
 
 

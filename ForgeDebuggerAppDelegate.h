@@ -19,6 +19,8 @@
 	NSTableView		*		mStackTable;
 	NSTableView		*		mVariablesTable;
 	NSTextView		*		mTextView;
+	NSTextField		*		mFileNameField;
+	NSTextField		*		mInstructionField;
 	ULINetSocket	*		mServerSocket;
 	ForgeDebuggerConnection*mDebuggerConnection;
 	NSMutableArray	*		mVariables;
@@ -34,6 +36,8 @@
 @property (assign) IBOutlet NSTableView		*		stackTable;
 @property (assign) IBOutlet NSTableView		*		variablesTable;
 @property (assign) IBOutlet NSTextView		*		textView;
+@property (assign) IBOutlet NSTextField		*		fileNameField;
+@property (assign) IBOutlet NSTextField		*		instructionField;
 @property (assign) IBOutlet NSButton		*		stepInstructionButton;
 @property (assign) IBOutlet NSButton		*		continueButton;
 @property (assign) IBOutlet NSButton		*		exitToTopButton;

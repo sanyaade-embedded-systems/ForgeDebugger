@@ -235,13 +235,14 @@
 }
 
 
--(void)	handleCURRInstruction: (NSData*)theData
+-(void)	handleCURROperation: (NSData*)theData
 {
 	unsigned long long			instructionPointer = 0;
 	[theData getBytes: &instructionPointer length: sizeof(instructionPointer)];
 	NSString			*		instructionKey = [NSString stringWithFormat: @"%ll016x", instructionPointer];
-		
-	NSIndexSet	*	indexesToSelect = [NSIndexSet indexSetWithIndex: [[self sortedInstructionKeysArray] indexOfObject: instructionKey]];
+	
+	NSUInteger		instrIdx = [[self sortedInstructionKeysArray] indexOfObjectIdenticalTo: instructionKey];
+	NSIndexSet	*	indexesToSelect = [NSIndexSet indexSetWithIndex: instrIdx];
 	[mInstructionsTableView selectRowIndexes: indexesToSelect byExtendingSelection: NO];
 }
 

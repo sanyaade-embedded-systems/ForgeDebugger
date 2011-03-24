@@ -24,6 +24,7 @@
 @synthesize exitToTopButton = mExitToTopButton;
 @synthesize addCheckpointButton = mAddCheckpointButton;
 @synthesize removeCheckpointButton = mRemoveCheckpointButton;
+@synthesize instructionsTableView = mInstructionsTableView;
 
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
@@ -34,6 +35,7 @@
 	
 	mVariables = [[NSMutableArray alloc] init];
 	mHandlers = [[NSMutableArray alloc] init];
+	mInstructions = [[NSMutableDictionary alloc] init];
 	
 	[self setDebuggerUIEnabled: NO];
 }
@@ -43,6 +45,7 @@
 {
 	[mVariables release];
 	[mHandlers release];
+	[mInstructions release];
 	
 	[super dealloc];
 }
@@ -104,8 +107,16 @@
 {
 	if( inView == mStackTable )
 		return [mHandlers count];
-	else
+	else if( inView == mVariablesTable )
 		return [mVariables count];
+	else
+		return [mInstructions count];
+}
+
+
+-(NSArray*)	sortedInstructionKeysArray
+{
+	return [[mInstructions allKeys] sortedArrayUsingSelector: @selector(compare:)];
 }
 
 
@@ -115,9 +126,15 @@
 	{
 		return [[mHandlers objectAtIndex: row] objectForKey: [tableColumn identifier]];
 	}
-	else
+	else if( inView == mVariablesTable )
 	{
 		return [[mVariables objectAtIndex: row] objectForKey: [tableColumn identifier]];
+	}
+	else
+	{
+		NSArray	*	sortedKeys = [self sortedInstructionKeysArray];
+		NSString* instructionStr = [mInstructions objectForKey: [sortedKeys objectAtIndex: row]];
+		return instructionStr;
 	}
 }
 
@@ -171,7 +188,10 @@
 	NSString	*	varName = [[NSString alloc] initWithData: varNameData encoding: NSUTF8StringEncoding];
 	NSString	*	varType = [[NSString alloc] initWithData: varTypeData encoding: NSUTF8StringEncoding];
 	NSString	*	varValue = [[NSString alloc] initWithData: varValueData encoding: NSUTF8StringEncoding];
-	[mVariables addObject: [NSDictionary dictionaryWithObjectsAndKeys: varName, @"name", varType, @"type", varValue, @"value", nil]];
+	[mVariables addObject: [NSDictionary dictionaryWithObjectsAndKeys:
+					varName, @"name",
+					varType, @"type",
+					varValue, @"value", nil]];
 	[varName release];
 	[varType release];
 	[varValue release];
@@ -187,7 +207,8 @@
 	NSData		*	handlerNameData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
 	
 	NSString	*	handlerName = [[NSString alloc] initWithData: handlerNameData encoding: NSUTF8StringEncoding];
-	[mHandlers addObject: [NSDictionary dictionaryWithObjectsAndKeys: handlerName, @"name", nil]];
+	[mHandlers addObject: [NSDictionary dictionaryWithObjectsAndKeys:
+					handlerName, @"name", nil]];
 	[handlerName release];
 	[mStackTable reloadData];
 }
@@ -200,15 +221,28 @@
 	unsigned long long			instructionPointer = 0;
 	static unsigned long long	sLastInstructionPointer = 0;
 	[theData getBytes: &instructionPointer range: NSMakeRange(theRange.location+theRange.length+1, sizeof(instructionPointer))];
+	NSString			*		instructionKey = [NSString stringWithFormat: @"%ll016x", instructionPointer];
 	
 	if( sLastInstructionPointer != instructionPointer )
 	{
-		NSString	*	instructionStr = [[NSString alloc] initWithData: instructionData encoding: NSUTF8StringEncoding];
-		[mInstructionField setStringValue: [NSString stringWithFormat: @"%ll016x: %@\n", instructionPointer, instructionStr]];
-		[instructionStr release];
+		NSString	*	instructionStr = [[[NSString alloc] initWithData: instructionData encoding: NSUTF8StringEncoding] autorelease];
+		
+		[mInstructions setObject: instructionStr forKey: instructionKey];
+		[mInstructionsTableView reloadData];
 		
 		sLastInstructionPointer = instructionPointer;
 	}
+}
+
+
+-(void)	handleCURRInstruction: (NSData*)theData
+{
+	unsigned long long			instructionPointer = 0;
+	[theData getBytes: &instructionPointer length: sizeof(instructionPointer)];
+	NSString			*		instructionKey = [NSString stringWithFormat: @"%ll016x", instructionPointer];
+		
+	NSIndexSet	*	indexesToSelect = [NSIndexSet indexSetWithIndex: [[self sortedInstructionKeysArray] indexOfObject: instructionKey]];
+	[mInstructionsTableView selectRowIndexes: indexesToSelect byExtendingSelection: NO];
 }
 
 
@@ -288,7 +322,7 @@
 
 -(IBAction)	doStepOneInstruction: (id)sender
 {
-	[mDebuggerConnection writeOneLine: @"step\0\0\0\0"];
+	[mDebuggerConnection writeCommandWithoutData: "step"];
 	
 	[self setDebuggerUIEnabled: NO];
 }
@@ -296,7 +330,7 @@
 
 -(IBAction)	doContinue: (id)sender
 {
-	[mDebuggerConnection writeOneLine: @"CONT\0\0\0\0"];
+	[mDebuggerConnection writeCommandWithoutData: "CONT"];
 
 	[self setDebuggerUIEnabled: NO];
 }
@@ -304,7 +338,7 @@
 
 -(IBAction)	doExitToTop: (id)sender
 {
-	[mDebuggerConnection writeOneLine: @"EXIT\0\0\0\0"];
+	[mDebuggerConnection writeCommandWithoutData: "EXIT"];
 
 	[self setDebuggerUIEnabled: NO];
 }
@@ -312,7 +346,7 @@
 
 -(IBAction)	doAddCheckpoint: (id)sender
 {
-	[mDebuggerConnection writeOneLine: @"+CHK\0\0\0\0"];
+	[mDebuggerConnection writeCommandWithoutData: "+CHK"];
 
 	[self setDebuggerUIEnabled: NO];
 }
@@ -320,7 +354,7 @@
 
 -(IBAction)	doRemoveCheckpoint: (id)sender
 {
-	[mDebuggerConnection writeOneLine: @"-CHK\0\0\0\0"];
+	[mDebuggerConnection writeCommandWithoutData: "-CHK"];
 
 	[self setDebuggerUIEnabled: NO];
 }

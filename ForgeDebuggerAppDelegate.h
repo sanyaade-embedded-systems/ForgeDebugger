@@ -30,6 +30,8 @@
 	NSButton		*		mExitToTopButton;
 	NSButton		*		mAddCheckpointButton;
 	NSButton		*		mRemoveCheckpointButton;
+	NSTableView		*		mInstructionsTableView;
+	NSMutableDictionary	*	mInstructions;
 }
 
 @property (assign) IBOutlet NSWindow		*		window;
@@ -43,6 +45,7 @@
 @property (assign) IBOutlet NSButton		*		exitToTopButton;
 @property (assign) IBOutlet NSButton		*		addCheckpointButton;
 @property (assign) IBOutlet NSButton		*		removeCheckpointButton;
+@property (assign) IBOutlet NSTableView		*		instructionsTableView;
 
 -(IBAction)	doStepOneInstruction: (id)sender;
 -(IBAction)	doContinue: (id)sender;

@@ -50,6 +50,16 @@
 }
 
 
+-(void)	writeCommandWithoutData: (const char*)str
+{
+	//NSLog( @"B Writing one line" );
+	
+	uint32_t	dataLen = 0;
+	[socket write: str length: 4];
+	[socket write: &dataLen length: sizeof(dataLen)];
+}
+
+
 - (void)netsocketConnected:(ULINetSocket*)inNetSocket
 {
 	//NSLog(@"B Connected.");

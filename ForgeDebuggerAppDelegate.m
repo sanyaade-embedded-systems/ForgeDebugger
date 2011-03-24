@@ -50,25 +50,25 @@
 
 - (void)netsocketConnected:(ULINetSocket*)inNetSocket
 {
-	NSLog(@"A Connected.");
+	//NSLog(@"A Connected.");
 }
 
 
 - (void)netsocket:(ULINetSocket*)inNetSocket connectionTimedOut:(NSTimeInterval)inTimeout
 {
-	NSLog(@"A Connection timed out.");
+	//NSLog(@"A Connection timed out.");
 }
 
 
 - (void)netsocketDisconnected:(ULINetSocket*)inNetSocket
 {
-	NSLog(@"A Disconnected.");
+	//NSLog(@"A Disconnected.");
 }
 
 
 - (void)netsocket:(ULINetSocket*)inNetSocket connectionAccepted:(ULINetSocket*)inNewNetSocket
 {
-	NSLog(@"A Connection accepted.");
+	//NSLog(@"A Connection accepted.");
 	
 	mDebuggerConnection = [[ForgeDebuggerConnection alloc] initWithSocket: inNewNetSocket debuggerSession: self];
 }
@@ -76,13 +76,13 @@
 
 - (void)netsocket:(ULINetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
 {
-	NSLog(@"A Data Available.");
+	//NSLog(@"A Data Available.");
 }
 
 
 - (void)netsocketDataSent:(ULINetSocket*)inNetSocket
 {
-	NSLog(@"A Data Sent.");
+	//NSLog(@"A Data Sent.");
 }
 
 

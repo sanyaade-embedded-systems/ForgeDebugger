@@ -22,7 +22,7 @@
 		
 		currentData = [[NSMutableData alloc] init];
 		
-		NSLog( @"B Connection Created" );
+		//NSLog( @"B Connection Created" );
 	}
 	
 	return self;
@@ -36,7 +36,7 @@
 	[currentData release];
 	currentData = nil;
 
-	NSLog( @"B Connection Destroyed" );
+	//NSLog( @"B Connection Destroyed" );
 	
 	[super dealloc];
 }
@@ -44,7 +44,7 @@
 
 -(void)	writeOneLine: (NSString*)str
 {
-	NSLog( @"B Writing one line" );
+	//NSLog( @"B Writing one line" );
 
 	[socket writeString: str encoding: NSUTF8StringEncoding];
 }
@@ -52,27 +52,27 @@
 
 - (void)netsocketConnected:(ULINetSocket*)inNetSocket
 {
-	NSLog(@"B Connected.");
+	//NSLog(@"B Connected.");
 }
 
 
 - (void)netsocket:(ULINetSocket*)inNetSocket connectionTimedOut:(NSTimeInterval)inTimeout
 {
 	[self autorelease];
-	NSLog(@"B Connection timed out.");
+	//NSLog(@"B Connection timed out.");
 }
 
 
 - (void)netsocketDisconnected:(ULINetSocket*)inNetSocket
 {
 	[self autorelease];
-	NSLog(@"B Disconnected.");
+	//NSLog(@"B Disconnected.");
 }
 
 
 - (void)netsocket:(ULINetSocket*)inNetSocket connectionAccepted:(ULINetSocket*)inNewNetSocket
 {
-	NSLog(@"B Connection accepted.");
+	//NSLog(@"B Connection accepted.");
 }
 
 
@@ -93,12 +93,12 @@
 	NSString	*	selName = [NSString stringWithFormat: @"handle%c%c%c%cOperation:", singleBytes[0], singleBytes[1], singleBytes[2], singleBytes[3]];
 	SEL	theAction = NSSelectorFromString( selName );
 	
-	NSLog( @"Asked to do %@ with %d bytes of payload", selName, payloadLength );
+	//NSLog( @"Asked to do %@ with %d bytes of payload", selName, payloadLength );
 	
 	if( [session respondsToSelector: theAction] )
 		[(NSObject*)session performSelectorOnMainThread: theAction withObject: thePayload waitUntilDone: NO];
 	else
-		NSLog( @"No handler for %@", selName );
+		;//NSLog( @"No handler for %@", selName );
 	
 	return payloadLength + 8;
 }
@@ -114,7 +114,7 @@
 
 - (void)netsocket:(ULINetSocket*)inNetSocket dataAvailable:(unsigned)inAmount
 {
-	NSLog( @"B %u bytes available", inAmount );
+	//NSLog( @"B %u bytes available", inAmount );
 	
 	[inNetSocket readOntoData: currentData];
 	
@@ -124,7 +124,7 @@
 
 - (void)netsocketDataSent:(ULINetSocket*)inNetSocket
 {
-	NSLog(@"B Data Sent.");
+	//NSLog(@"B Data Sent.");
 }
 
 @end

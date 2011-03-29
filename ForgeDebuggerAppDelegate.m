@@ -141,6 +141,7 @@
 
 -(NSData*)	subdataUntilNextNullByteInData: (NSData*)theData foundRange: (NSRange*)theRange	// Must be { 0, 0 } on first call.
 {
+	BOOL		didFindTerminator = NO;
 	NSInteger	len = [theData length];
 	char		theByte = 0;
 	theRange->location += theRange->length;
@@ -153,11 +154,14 @@
 	{
 		[theData getBytes: &theByte range: NSMakeRange(x,1)];
 		if( theByte == 0 )
+		{
+			didFindTerminator = YES;
 			break;
+		}
 		theRange->length ++;
 	}
 	
-	if( theRange->length == 0 || theRange->location >= [theData length] )
+	if( !didFindTerminator || theRange->location >= [theData length] )
 	{
 		theRange->location = [theData length];
 		theRange->length = 0;
@@ -180,10 +184,25 @@
 -(void)	handleVARIOperation: (NSData*)theData
 {
 	NSRange			theRange = { 0, 0 };
+	NSRange			oldRange;
 	
 	NSData		*	varNameData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
 	NSData		*	varTypeData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
 	NSData		*	varValueData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
+	
+	oldRange = theRange;
+	unsigned long long	objectID = 0;
+	unsigned long long	referenceObjectID = 0;
+	unsigned long long	referenceObjectSeed = 0;
+	theRange.location += theRange.length +1;
+	
+	theRange.length = sizeof(unsigned long long);
+	[theData getBytes: &objectID range: theRange];
+	theRange.location += theRange.length;
+	[theData getBytes: &referenceObjectID range: theRange];
+	theRange.location += theRange.length;
+	[theData getBytes: &referenceObjectSeed range: theRange];
+	theRange.location += theRange.length;
 	
 	NSString	*	varName = [[NSString alloc] initWithData: varNameData encoding: NSUTF8StringEncoding];
 	NSString	*	varType = [[NSString alloc] initWithData: varTypeData encoding: NSUTF8StringEncoding];
@@ -191,7 +210,11 @@
 	[mVariables addObject: [NSDictionary dictionaryWithObjectsAndKeys:
 					varName, @"name",
 					varType, @"type",
-					varValue, @"value", nil]];
+					varValue, @"value",
+					[NSNumber numberWithUnsignedLongLong: objectID], @"objectID",
+					[NSNumber numberWithUnsignedLongLong: referenceObjectID], @"referenceObjectID",
+					[NSNumber numberWithUnsignedLongLong: referenceObjectSeed], @"referenceObjectSeed",
+					nil]];
 	[varName release];
 	[varType release];
 	[varValue release];
@@ -220,14 +243,19 @@
 	NSData				*		instructionData = [self subdataUntilNextNullByteInData: theData foundRange: &theRange];
 	unsigned long long			instructionPointer = 0;
 	static unsigned long long	sLastInstructionPointer = 0;
-	[theData getBytes: &instructionPointer range: NSMakeRange(theRange.location+theRange.length+1, sizeof(instructionPointer))];
+	theRange.location += theRange.length +1;
+	theRange.length = sizeof(instructionPointer);
+	
+	[theData getBytes: &instructionPointer range: theRange];
+	theRange.location += theRange.length;
+	
 	NSString			*		instructionKey = [NSString stringWithFormat: @"%ll016x", instructionPointer];
 	
 	if( sLastInstructionPointer != instructionPointer )
 	{
 		NSString	*	instructionStr = [[[NSString alloc] initWithData: instructionData encoding: NSUTF8StringEncoding] autorelease];
 		
-		[mInstructions setObject: instructionStr forKey: instructionKey];
+		[mInstructions setObject: [NSString stringWithFormat: @"%@: %@", instructionKey,instructionStr] forKey: instructionKey];
 		[mInstructionsTableView reloadData];
 		
 		sLastInstructionPointer = instructionPointer;
@@ -241,9 +269,17 @@
 	[theData getBytes: &instructionPointer length: sizeof(instructionPointer)];
 	NSString			*		instructionKey = [NSString stringWithFormat: @"%ll016x", instructionPointer];
 	
-	NSUInteger		instrIdx = [[self sortedInstructionKeysArray] indexOfObjectIdenticalTo: instructionKey];
-	NSIndexSet	*	indexesToSelect = [NSIndexSet indexSetWithIndex: instrIdx];
-	[mInstructionsTableView selectRowIndexes: indexesToSelect byExtendingSelection: NO];
+	[mInstructionField setStringValue: instructionKey];
+	
+	NSArray		*	keysArray = [self sortedInstructionKeysArray];
+	NSUInteger		instrIdx = [keysArray indexOfObject: instructionKey];
+	if( instrIdx == NSNotFound )
+		[mInstructionsTableView deselectAll: self];
+	else
+	{
+		NSIndexSet	*	indexesToSelect = [NSIndexSet indexSetWithIndex: instrIdx];
+		[mInstructionsTableView selectRowIndexes: indexesToSelect byExtendingSelection: NO];
+	}
 }
 
 

@@ -279,6 +279,7 @@
 	{
 		NSIndexSet	*	indexesToSelect = [NSIndexSet indexSetWithIndex: instrIdx];
 		[mInstructionsTableView selectRowIndexes: indexesToSelect byExtendingSelection: NO];
+		[mInstructionsTableView scrollRowToVisible: instrIdx];
 	}
 }
 
